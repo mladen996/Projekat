@@ -2,20 +2,123 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-       xmlns:p="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
-        <title>ADMINISTRATOR</title>
+        <title>sale</title>
     </h:head>
-    <h:body><h:form>
-            <h3>Dobrodosli #{login_bean.username}</h3>
-            <h:panelGrid columns="2">
-                <h:link value="Dodaj prikazivanje" outcome ="prikazivanje"/>
-                <h:link value="Dodaj filmove" outcome ="filmovi"/>
-                <h:link value="Dodaj sale" outcome ="sala"/>
-                <h:link value="Dodaj sed" outcome ="aaaa"/>
-            </h:panelGrid>
-        </h:form>
-    </h:body>
+    <h:panelGrid columns="2">
+        <h:body><h:form>
+                <h2>Dobrodosli #{login_bean.username}</h2>
+
+                <h3>Dodaj salu</h3>
+
+                <h:panelGrid columns="3">
+
+
+                    <h:outputLabel for="bioskop" value ="Bioskop"/>
+                    <h:selectOneMenu id="bioskop" value="#{salaController.idBioskopa}">
+                        <f:selectItems value="#{bioskopController.vratiBioskope().entrySet()}" var="entry" 
+                                       itemValue="#{entry.key}" itemLabel="#{entry.value}"/>
+                    </h:selectOneMenu> 
+                    <h:message for="bioskop" />
+
+                    <h:outputLabel for="brojS" value ="broj Sedista"/>
+                    <h:inputText id="brojS" value="#{sala.brojSedista}" required="true"/>
+                    <h:message for="brojS" />
+
+                    <h:commandButton value="Dodaj"
+                                     action="#{salaController.
+                                               dodajSalu(sala)}"/>
+
+
+                </h:panelGrid>
+            </h:form>
+        </h:body>
+
+        <h:body><h:form>
+                <h3>Dodaj film</h3>
+                <h:panelGrid columns="2">
+                    <h:outputLabel for="naziv" value ="Naziv Filma"/>
+                    <h:inputText id="NF" value="#{film.naziv}" required="true"/>
+
+                    <h:outputLabel for="duzina" value ="Duzina Filma"/>
+                    <h:inputText id="D"  value="#{film.duzinaFilma}" required="true"/>
+
+                    <h:outputLabel for="ocena" value ="Ocena"/>
+                    <h:inputText id="O"  value="#{film.ocena}" required="true"/>
+
+                    <h:outputLabel for="godina" value ="Godina"/>
+                    <h:inputText id="a"  value="#{film.godina}" required="true"/>
+
+                    <h:outputLabel for="jezik" value ="Jezik filma"/>
+                    <h:selectOneMenu value="#{filmController.idJezika}">
+                        <f:selectItems value="#{jezikController.idimenaJezika().entrySet()}" var="entry" 
+                                       itemValue="#{entry.key}" itemLabel="#{entry.value}"/>
+                    </h:selectOneMenu> 
+
+                    <h:outputLabel for="reziser" value ="Reziser"/>
+                    <h:selectOneMenu value="#{filmController.idRezisera}">
+                        <f:selectItems value="#{reziserController.idimenaReziser().entrySet()}" var="entry" 
+                                       itemValue="#{entry.key}" itemLabel="#{entry.value}"/>
+                    </h:selectOneMenu>
+
+                    <h:commandButton value="Dodaj"
+                                     action="#{filmController.
+                                               dodajFilm(film)}"/>
+
+
+                </h:panelGrid>
+            </h:form>
+        </h:body>
+
+
+        <h:body><h:form>
+                <h3>Dodaj prikazivanje</h3>
+                <h:panelGrid columns="3">
+                    <h:outputLabel for="dPrikazivanja" value="Datum prikazivanja"/>
+                    <h:inputText id="dPrikazivanja" value="#{prikazivanje.datumPrikazivanja}" required="true" requiredMessage="Unesite datum.">
+                        <f:convertDateTime  pattern="dd.MM.yyyy HH:mm" timeZone="Europe/Belgrade" />
+                    </h:inputText>
+                    <h:message for="dPrikazivanja"/>
+
+
+                    <h:outputLabel for="bioskop" value="Bioskop"/>
+                    <h:selectOneMenu id="bioskop" valueChangeListener="#{prikazivanjeController.valueChange}" onchange="submit()">
+                        <f:selectItems value="#{bioskopController.vratiBioskope().entrySet()}" var="entry"
+                                       itemValue="#{entry.key}" itemLabel="#{entry.value}" />
+                    </h:selectOneMenu>
+                    <h:message for="bioskop"/>
+
+
+                    <h:outputLabel for="sala" value ="Sala"/>
+                    <h:selectOneMenu id="sala" value="#{prikazivanjeController.idSala}" >
+                        <f:selectItems value="#{prikazivanjeController.salaLista}" var="entry"  
+                                       itemValue="#{entry.salaPK.salaID}" itemLabel="#{entry.brojSedista}"/>
+                    </h:selectOneMenu>
+                    <h:message for="sala"/>
+
+                    <h:outputLabel for="film" value ="Film"/>
+                    <h:selectOneMenu id="film" value="#{prikazivanjeController.idFilma}">
+                        <f:selectItems value="#{filmController.vratiFilmove().entrySet()}" var="entry" 
+                                       itemValue="#{entry.key}" itemLabel="#{entry.value}"/>
+                    </h:selectOneMenu>
+                    <h:message for="film"/>
+
+                    <h:outputLabel for="cena" value="Cena"/>
+                    <h:inputText id="cena" value="#{prikazivanje.cena}" required="true" requiredMessage="Unesite cenu."/>
+                    <h:message for="cena"/>
+
+
+                    <h:commandButton value="Dodaj"
+                                     action="#{prikazivanjeController.
+                                               dodajPrikazivanje(prikazivanje)}"/>
+
+                </h:panelGrid>
+            </h:form>
+        </h:body>
+
+    </h:panelGrid>
+
 </html>
 
