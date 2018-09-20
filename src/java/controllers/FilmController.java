@@ -22,7 +22,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
@@ -115,22 +117,24 @@ public class FilmController {
 
     public Map<Integer, String> vratiFilmove() {
 
-        try {
-            Connection connection = null;
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bioskopi", "root", "");
+        Configuration cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
+        SessionFactory sf = cfg.buildSessionFactory();
+        Session s = sf.openSession();
+        Transaction tx = s.beginTransaction();
 
-            PreparedStatement ps = null;
-            ps = connection.prepareStatement("select * from film");
-            ResultSet rs = ps.executeQuery();
+        Query q = s.createQuery("SELECT j FROM Film j");
+        List<Film> listaSala = q.list();
 
-            while (rs.next()) {
-                mapa2.put(Integer.parseInt(rs.getString("filmID")), rs.getString("naziv"));
-            }
+        Iterator<Film> iterator = listaSala.iterator();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (iterator.hasNext()) {
+            Film film = iterator.next();
+
+            mapa2.put(film.getFilmID(), film.getNaziv());
+
         }
+
         return mapa2;
 
     }

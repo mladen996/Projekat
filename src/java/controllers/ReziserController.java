@@ -28,6 +28,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,27 +52,28 @@ import org.hibernate.cfg.Configuration;
 @RequestScoped
 public class ReziserController {
 
-private Map<Integer,String> mapa = new LinkedHashMap<Integer,String>();
-     public Map<Integer,String> idimenaReziser() {
-        
-        try {
-            Connection connection = null;
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bioskopi","root","");
-            
-            
-            PreparedStatement ps = null;
-            ps=connection.prepareStatement("select * from reziser");
-            ResultSet rs = ps.executeQuery();
-            
-            while(rs.next()){
-                mapa.put(Integer.parseInt(rs.getString("reziserID")), rs.getString("ime") + " " + rs.getString("prezime"));
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
+    private Map<Integer, String> mapa = new LinkedHashMap<Integer, String>();
+
+    public Map<Integer, String> idimenaReziser() {
+
+        Configuration cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
+        SessionFactory sf = cfg.buildSessionFactory();
+        Session s = sf.openSession();
+        Transaction tx = s.beginTransaction();
+
+        Query q = s.createQuery("SELECT j FROM Reziser j");
+        List<Reziser> listaSala = q.list();
+
+        Iterator<Reziser> iterator = listaSala.iterator();
+
+        while (iterator.hasNext()) {
+            Reziser reziser = iterator.next();
+
+            mapa.put(reziser.getReziserID(), reziser.getIme() + "" + reziser.getPrezime());
+
         }
         return mapa;
     }
- 
+
 }

@@ -55,7 +55,7 @@ public class PrikazivanjeController {
 
     private Map<String, String> mapa2 = new LinkedHashMap<String, String>();
     private List<Sala> salaLista = new ArrayList<Sala>();
-    private int idFilma,idBioskopa;
+    private int idFilma, idBioskopa;
 
     public int getIdBioskopa() {
         return idBioskopa;
@@ -74,7 +74,6 @@ public class PrikazivanjeController {
         this.mapa2 = mapa2;
     }
 
-
     public int getIdSala() {
         return idSala;
     }
@@ -90,8 +89,6 @@ public class PrikazivanjeController {
     public void setSalaLista(List<Sala> salaLista) {
         this.salaLista = salaLista;
     }
-
-
 
     public Prikazivanje getPrikazivanje() {
         return prikazivanje;
@@ -118,22 +115,24 @@ public class PrikazivanjeController {
     }
 
     public void vratiSale() {
-        try {
-            Connection connection = null;
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bioskopi", "root", "");
+        Configuration cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
+        SessionFactory sf = cfg.buildSessionFactory();
+        Session s = sf.openSession();
+        Transaction tx = s.beginTransaction();
 
-            PreparedStatement ps = null;
-            ps = connection.prepareStatement("select * from sala");
-            ResultSet rs = ps.executeQuery();
+        Query q = s.createQuery("SELECT j FROM Sala j");
+        List<Sala> listaSala = q.list();
 
-            while (rs.next()) {
-                mapa2.put(rs.getString("salaID")+"_"+rs.getString("bioskopID"), "Broj bioskopa:" + rs.getString("bioskopID") + " broj sale:" + rs.getString("grad")
-                        + " broj mesta: " + rs.getString("brojMesta"));
-            }
+        Iterator<Sala> iterator = listaSala.iterator();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (iterator.hasNext()) {
+            Sala sala = iterator.next();
+            q = s.createQuery("SELECT b FROM Bioskop b WHERE b.bioskopID = :bioskopID");
+            Bioskop bioskop = (Bioskop) q.uniqueResult();
+            mapa2.put(sala.getSalaPK().getSalaID() + "_" + sala.getSalaPK().getBioskopID(), "Broj bioskopa: "
+                    + sala.getSalaPK().getBioskopID() + " broj sale:" + bioskop.getGrad() + " broj mestaaaa: " + sala.getBrojSedista());
+
         }
     }
 
@@ -156,16 +155,17 @@ public class PrikazivanjeController {
         s.close();
 
         dao.save(p);
-        
-        SedisteController sc=new SedisteController();
+
+        SedisteController sc = new SedisteController();
         Sediste sediste;
-        for(int i=0;i<sala.getBrojSedista();i++){
-            sediste = new Sediste(idSala, idBioskopa,p.getPrikazivanjeID(), i);
+        for (int i = 0; i < sala.getBrojSedista(); i++) {
+            sediste = new Sediste(idSala, idBioskopa, p.getPrikazivanjeID(), i);
             sediste.setIsFree(Boolean.TRUE);
             sc.ubaciSedista(sediste);
         }
 
     }
+
     public void valueChange(ValueChangeEvent e) {
         idBioskopa = Integer.parseInt(e.getNewValue() + "");
 

@@ -5,14 +5,22 @@
  */
 package controllers;
 
+import bioskopi.entities.Bioskop;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.bean.ManagedBean;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 
 /**
  *
@@ -24,26 +32,25 @@ public class BioskopController {
     
     private Map<Integer, String> mapa2 = new LinkedHashMap<Integer, String>();
 
-   
-    
-    
-     public Map<Integer, String> vratiBioskope() {
 
-        try {
-            Connection connection = null;
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bioskopi", "root", "");
+    public Map<Integer, String> vratiBioskope() {
 
-            PreparedStatement ps = null;
-            ps = connection.prepareStatement("select * from bioskop");
-            ResultSet rs = ps.executeQuery();
+        Configuration cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
+        SessionFactory sf = cfg.buildSessionFactory();
+        Session s = sf.openSession();
+        Transaction tx = s.beginTransaction();
 
-            while (rs.next()) {
-                mapa2.put(Integer.parseInt(rs.getString("bioskopID")), rs.getString("ime")+rs.getString("grad"));
-            }
+        Query q = s.createQuery("SELECT j FROM Bioskop j");
+        List<Bioskop> listaSala = q.list();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        Iterator<Bioskop> iterator = listaSala.iterator();
+
+        while (iterator.hasNext()) {
+            Bioskop bioskop = iterator.next();
+
+            mapa2.put(bioskop.getBioskopID(), bioskop.getIme() + bioskop.getGrad());
+
         }
         return mapa2;
 

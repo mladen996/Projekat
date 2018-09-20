@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +37,12 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.ConverterException;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 
 /**
  *
@@ -49,10 +52,7 @@ import org.hibernate.Transaction;
 @RequestScoped
 public class JezikController {
 
-    
     private Map<Integer, String> mapa2 = new LinkedHashMap<Integer, String>();
-
-  
 
     public Map<Integer, String> getMapa2() {
         return mapa2;
@@ -61,26 +61,25 @@ public class JezikController {
     public void setMapa2(Map<Integer, String> mapa2) {
         this.mapa2 = mapa2;
     }
-    
 
-    public Map<Integer,String> idimenaJezika() {
-        
-          try {
-            Connection connection = null;
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bioskopi","root","");
-            
-            
-            PreparedStatement ps = null;
-            ps=connection.prepareStatement("select * from jezik");
-            ResultSet rs = ps.executeQuery();
-            
-            while(rs.next()){
-                mapa2.put(Integer.parseInt(rs.getString("jezikID")), rs.getString("ime"));
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
+    public Map<Integer, String> idimenaJezika() {
+
+        Configuration cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
+        SessionFactory sf = cfg.buildSessionFactory();
+        Session s = sf.openSession();
+        Transaction tx = s.beginTransaction();
+
+        Query q = s.createQuery("SELECT j FROM Jezik j");
+        List<Jezik> listaSala = q.list();
+
+        Iterator<Jezik> iterator = listaSala.iterator();
+
+        while (iterator.hasNext()) {
+            Jezik jezik = iterator.next();
+
+            mapa2.put(jezik.getJezikID(), jezik.getIme());
+
         }
         return mapa2;
 
