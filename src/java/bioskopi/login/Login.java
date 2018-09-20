@@ -6,6 +6,7 @@
 package bioskopi.login;
 
 
+import bioskopi.entities.Korisnik;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,6 +15,11 @@ import java.sql.Statement;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 
 
 
@@ -60,47 +66,30 @@ public class Login {
     public void setMessage(String message) {
         this.message = message;
     }
-    public int checkUser() throws SQLException{
-        String query;
-        String dbUsername, dbPassword;
-        boolean dbisAdmin;
+    public int checkUser() {
         int login = 0;
-        int dbID;
 
-        try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bioskopi", "root", "");
-            Statement stmt = (Statement) con.createStatement();
-            query = "SELECT username, password, isAdmin, korisnikID FROM korisnik;";
-            stmt.executeQuery(query);
-            ResultSet rs = stmt.getResultSet();
-            
-            while(rs.next()){
-                dbID =rs.getInt("korisnikID");
-                dbUsername = rs.getString("username");
-                dbPassword = rs.getString("password");
-                dbisAdmin = rs.getBoolean("isAdmin");
+        Configuration cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
+        SessionFactory sf = cfg.buildSessionFactory();
+        Session s = sf.openSession();
+        Transaction tx = s.beginTransaction();
 
-                if(dbUsername.equals(username) && dbPassword.equals(password)){
-                    id=dbID;
-                    login = 1;
-                    if(dbisAdmin == true){
-                        login = 2;
-                    }
+        Query q = s.createQuery("SELECT k FROM Korisnik k WHERE k.username = :username");
+        q.setString("username", username);
+        Korisnik korisnik = (Korisnik) q.uniqueResult();
+        if (korisnik != null) {
+            if (korisnik.getPassword().equals(password)) {
+
+                login = 1;
+                if (korisnik.getIsAdmin() != null) {
+                    login = 2;
                 }
-                
+            } else {
+                this.message = "Password nije validan.";
             }
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        if(login == 0){
-            this.message = "Username ili password nisu validni.";
+        } else {
+            this.message = "Username nije validan";
         }
         return login;
     }
