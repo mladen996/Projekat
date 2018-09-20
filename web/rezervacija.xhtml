@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>REZERVACIJA</title>
+    </h:head>
+    <h:body><h:form>
+            <h3>Dobrodosli #{login_bean.username}</h3>
+            <h:panelGrid columns="3">
+                <h:outputLabel for="bioskop" value="Bioskop"/>
+                <h:selectOneMenu id="bioskop" valueChangeListener="#{kartaController.valueChange}" onchange="submit()">
+                    <f:selectItems value="#{bioskopController.vratiBioskope().entrySet()}" var="entry"
+                                   itemValue="#{entry.key}" itemLabel="#{entry.value}" />
+                </h:selectOneMenu>
+                <h:message for="bioskop"/>
+
+                <h:outputLabel for="film" value ="Film"/>
+                <h:selectOneMenu id="film" valueChangeListener="#{kartaController.valueChange2}" onchange="submit()" >
+                    <f:selectItems value="#{kartaController.mapaImena.entrySet()}" var="entry"  
+                                   itemValue="#{entry.key}" itemLabel="#{entry.value}"  />
+                </h:selectOneMenu>
+                <h:message for="film"/>
+
+                <h:outputLabel for="sediste" value ="Broj sedista:"/>
+                <h:selectOneMenu id="sediste" value="#{kartaController.idSedista}" >
+                    <f:selectItems value="#{kartaController.listaSedista}" var="entry"  
+                                   itemValue="#{entry.sedistePK.sedisteID}" itemLabel="#{entry.sedistePK.sedisteID}"  />
+                </h:selectOneMenu>
+                <h:message for="sediste" />
+
+                <h:outputLabel  value ="Cena: #{kartaController.cena}"   />
+                <h:outputLabel  />
+                <h:outputLabel  />
+
+                <h:outputLabel value="Da li prihvatate pravila koriscenja sajta"/>
+                <h:selectOneMenu id="id" value="#{kartaController.korisnikID}" required="true">
+                    <f:selectItem itemValue="#{login_bean.id}" itemLabel="DA"/>
+                    <f:selectItem itemValue="#{login_bean.id}" itemLabel="ne"/>
+                </h:selectOneMenu>
+                <h:message for="id" />
+                
+                <h:commandButton value="Dodaj"
+                                 action="#{kartaController.dodajKartu()}"/>
+            </h:panelGrid>
+        </h:form>
+    </h:body>
+</html>
+
